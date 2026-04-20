@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加密貨幣投資分析 Demo</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>📊 加密貨幣投資分析平台</h1>
+            <p class="subtitle">前20大加密貨幣 (2020-2024年投報率分析)</p>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="tabs">
+            <button class="tab-btn active" data-tab="overview">概覽</button>
+            <button class="tab-btn" data-tab="roi-analysis">投報率分析</button>
+            <button class="tab-btn" data-tab="dca-calculator">定投計算器</button>
+        </nav>
+
+        <!-- Tab 1: Overview -->
+        <section id="overview" class="tab-content active">
+            <div class="section-title">
+                <h2>前20大加密貨幣</h2>
+                <p>按市值排序</p>
+            </div>
+
+            <div class="filters">
+                <input type="text" id="searchInput" placeholder="搜尋幣種 (symbol 或 name)...">
+                <select id="sortBy">
+                    <option value="rank">按排名排序</option>
+                    <option value="roi_5year">按5年投報率排序</option>
+                    <option value="roi_2024">按2024年投報率排序</option>
+                </select>
+            </div>
+
+            <table id="cryptoTable" class="crypto-table">
+                <thead>
+                    <tr>
+                        <th>排名</th>
+                        <th>代碼</th>
+                        <th>名稱</th>
+                        <th>最新價格(USD)</th>
+                        <th>市值(十億)</th>
+                        <th>2020年</th>
+                        <th>2021年</th>
+                        <th>2022年</th>
+                        <th>2023年</th>
+                        <th>2024年</th>
+                        <th>5年投報率</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- 動態填充 -->
+                </tbody>
+            </table>
+
+            <div id="history-chart-container" style="display: none; margin-top: 30px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 id="historyChartTitle" style="margin: 0; color: #1e293b;">歷史價格走勢</h3>
+                    <button onclick="closeHistoryChart()" style="background: none; border: none; font-size: 20px; cursor: pointer;">&times;</button>
+                </div>
+                <canvas id="mainHistoryChart" height="100"></canvas>
+            </div>
+        </section>
+
+        <!-- Tab 2: ROI Analysis -->
+        <section id="roi-analysis" class="tab-content">
+            <div class="section-title">
+                <h2>投報率分析</h2>
+                <p>年度投報率對比</p>
+            </div>
+
+            <div class="charts-container">
+                <div class="chart-box">
+                    <h3>各年度投報率對比 (Top 10)</h3>
+                    <canvas id="yearlyROIChart"></canvas>
+                </div>
+
+                <div class="chart-box">
+                    <h3>單幣5年投報率排名</h3>
+                    <canvas id="top5YearROIChart"></canvas>
+                </div>
+            </div>
+
+            <div class="stats-container">
+                <div class="stat-card">
+                    <h4>2024年表現最好</h4>
+                    <p id="best2024"></p>
+                </div>
+                <div class="stat-card">
+                    <h4>2024年表現最差</h4>
+                    <p id="worst2024"></p>
+                </div>
+                <div class="stat-card">
+                    <h4>5年最佳投報率</h4>
+                    <p id="best5year"></p>
+                </div>
+                <div class="stat-card">
+                    <h4>平均5年投報率</h4>
+                    <p id="avg5year"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 3: DCA Calculator -->
+        <section id="dca-calculator" class="tab-content">
+            <div class="section-title">
+                <h2>定期定額投資(DCA)計算器</h2>
+                <p>計算長期定投的收益</p>
+            </div>
+
+            <div class="calculator-container">
+                <div class="calculator-input">
+                    <div class="input-group">
+                        <label for="selectedCrypto">選擇加密貨幣:</label>
+                        <select id="selectedCrypto">
+                            <option value="">-- 選擇一個幣種 --</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="initialInvestment">初始投資 (USD):</label>
+                        <input type="number" id="initialInvestment" value="1000" min="0" step="100">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="monthlyInvestment">每月定投 (USD):</label>
+                        <input type="number" id="monthlyInvestment" value="500" min="0" step="50">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="investmentYears">投資年限 (年):</label>
+                        <select id="investmentYears">
+                            <option value="1">1 年</option>
+                            <option value="2">2 年</option>
+                            <option value="3">3 年</option>
+                            <option value="4" selected>4 年</option>
+                            <option value="5">5 年</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="investmentStart">投資起始年份:</label>
+                        <select id="investmentStart">
+                            <option value="2020">2020 年</option>
+                            <option value="2021">2021 年</option>
+                            <option value="2022">2022 年</option>
+                            <option value="2023">2023 年</option>
+                        </select>
+                    </div>
+
+                    <button class="calculate-btn" onclick="calculateDCA()">計算</button>
+                </div>
+
+                <div class="calculator-results" id="dcaResults" style="display: none;">
+                    <h3>計算結果</h3>
+                    <div class="result-item">
+                        <span>總投入金額:</span>
+                        <strong id="result-total-invested">$0</strong>
+                    </div>
+                    <div class="result-item">
+                        <span>最終資產價值:</span>
+                        <strong id="result-final-value">$0</strong>
+                    </div>
+                    <div class="result-item">
+                        <span>投資收益:</span>
+                        <strong id="result-profit">$0</strong>
+                    </div>
+                    <div class="result-item">
+                        <span>投報率:</span>
+                        <strong id="result-roi">0%</strong>
+                    </div>
+                    <div class="result-item">
+                        <span>年化收益率:</span>
+                        <strong id="result-annual-roi">0%</strong>
+                    </div>
+
+                    <canvas id="dcaSimulationChart"></canvas>
+                </div>
+
+                <div class="dca-info">
+                    <h4>📌 定期定額投資(DCA)說明</h4>
+                    <ul>
+                        <li><strong>定期定額投資</strong>是一種長期投資策略，固定時間(如每月)投入固定金額</li>
+                        <li>該計算基於<strong>歷史投報率</strong>進行模擬，實際結果會有所不同</li>
+                        <li>投報率基於該年度的起始價和年底價計算</li>
+                        <li>此計算器用於<strong>教育和演示目的</strong>，不構成投資建議</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>⚠️ 免責聲明: 本數據僅供教育和演示用途。加密貨幣投資具有高風險。投資前請做足功課並諮詢專業人士。</p>
+            <p>數據來源: CoinGecko (歷史投報率基於實際市場數據)</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
